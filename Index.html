@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ANOVA Exam Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=STIX+Two+Text:ital,wght@0,400;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#EDF1F2; --surface:#FFFFFF; --surface2:#F5F8F8; --ink:#17252B; --muted:#55656C; --line:#D2DBDF;
+  --slate:#3E525B; --slate-ink:#FFFFFF; --accent:#1C7556; --accent-t:#DCF0E6;
+  --ok:#1B7444; --ok-t:#E0F2E7; --bad:#AE2A2A; --bad-t:#FBE5E3; --warn:#875700; --warn-t:#FAEFD7;
+  --g1:#5547BE; --g1t:#ECEAFB; --g2:#0D785C; --g2t:#DEF2EA; --g3:#AD4720; --g3t:#FAE8E0; --g4:#2B66AB; --g4t:#E2EDFA; --g5:#8B5D06; --g5t:#F7EDD6;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-math:"STIX Two Text", "Cambria Math", Cambria, "Times New Roman", serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0E1618; --surface:#162125; --surface2:#1C292E; --ink:#E3EBED; --muted:#9BABB1; --line:#2B3A40;
+  --slate:#2A3A41; --slate-ink:#E3EBED; --accent:#5DC79F; --accent-t:#113A2C;
+  --ok:#62C98E; --ok-t:#122F1E; --bad:#F08B80; --bad-t:#3B1714; --warn:#EFC062; --warn-t:#35290B;
+  --g1:#ADA4F2; --g1t:#25204E; --g2:#5BCAA5; --g2t:#0C3227; --g3:#F19A74; --g3t:#3F200F; --g4:#8CBAEE; --g4t:#132A46; --g5:#EEC369; --g5t:#392A08;
+  color-scheme:dark; }}
+:root[data-theme="dark"]{
+  --bg:#0E1618; --surface:#162125; --surface2:#1C292E; --ink:#E3EBED; --muted:#9BABB1; --line:#2B3A40;
+  --slate:#2A3A41; --slate-ink:#E3EBED; --accent:#5DC79F; --accent-t:#113A2C;
+  --ok:#62C98E; --ok-t:#122F1E; --bad:#F08B80; --bad-t:#3B1714; --warn:#EFC062; --warn-t:#35290B;
+  --g1:#ADA4F2; --g1t:#25204E; --g2:#5BCAA5; --g2t:#0C3227; --g3:#F19A74; --g3t:#3F200F; --g4:#8CBAEE; --g4t:#132A46; --g5:#EEC369; --g5t:#392A08;
+  color-scheme:dark; }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:24px 64px}
+.wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(28px,5vw,40px);font-weight:700;letter-spacing:-.01em}
+h2{font-size:21px;font-weight:700}
+h3{font-size:16px;font-weight:700}
+p{margin:0}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px}
+.c1{--gc:var(--g1);--gt:var(--g1t)}.c2{--gc:var(--g2);--gt:var(--g2t)}.c3{--gc:var(--g3);--gt:var(--g3t)}.c4{--gc:var(--g4);--gt:var(--g4t)}.c5{--gc:var(--g5);--gt:var(--g5t)}
+
+/* header */
+.top{display:flex;flex-direction:column;gap:10px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.lede{color:var(--muted);max-width:62ch}
+.progress{display:flex;align-items:center;gap:12px;margin-top:4px}
+.bar{flex:1;height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.bar span{display:block;height:100%;background:var(--accent);transition:width .3s}
+.ptext{font-size:13px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.nav{display:flex;flex-wrap:wrap;gap:6px}
+.nav a{font-size:13px;text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;display:inline-flex;gap:6px;align-items:center}
+.nav a .d{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.nav a.done .d{background:var(--ok)}.nav a.shown .d{background:var(--warn)}.nav a.try .d{background:var(--bad)}
+
+/* panels */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel-head{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:8px;padding:7px 12px;font-size:14px}
+.btn:hover{border-color:var(--muted)}
+.btn.on{background:var(--slate);color:var(--slate-ink);border-color:var(--slate)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:700}
+.btn.ghost{background:transparent}
+.story{background:var(--surface2);border-radius:10px;padding:12px 14px;font-size:15px}
+.story textarea,.story input{width:100%;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.story label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.story .row{display:grid;gap:10px}
+.groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.gcard{border:1px solid var(--line);border-top:4px solid var(--gc);border-radius:0 0 10px 10px;padding:10px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.ghead{display:flex;gap:6px;align-items:center}
+.gname{flex:1;min-width:0;font:inherit;font-weight:700;color:var(--gc);background:var(--gt);border:1px solid transparent;border-radius:6px;padding:4px 8px}
+.gname:hover{border-color:var(--line)}
+.icon{border:none;background:transparent;color:var(--muted);font-size:18px;line-height:1;padding:2px 6px;border-radius:6px}
+.icon:hover{background:var(--surface2);color:var(--bad)}
+.scores{display:flex;flex-wrap:wrap;gap:6px}
+.sc{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:6px;background:var(--surface2)}
+.sc input{width:44px;border:none;background:transparent;font-family:var(--f-mono);font-size:14px;color:var(--ink);text-align:center;padding:4px 2px}
+.sc.badv{border-color:var(--bad);background:var(--bad-t)}
+.sc button{border:none;background:transparent;color:var(--muted);font-size:13px;padding:0 5px 0 0}
+.sc button:hover{color:var(--bad)}
+.add{border:1px dashed var(--line);background:transparent;color:var(--muted);border-radius:6px;font-size:13px;padding:4px 8px}
+.add:hover{color:var(--ink);border-color:var(--muted)}
+.gstat{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.addgroup{border:1.5px dashed var(--line);border-radius:10px;background:transparent;color:var(--muted);min-height:90px;font-size:14px}
+.addgroup:hover{color:var(--ink);border-color:var(--muted)}
+.note{font-size:14px;border-radius:8px;padding:10px 12px;background:var(--warn-t);color:var(--warn)}
+.note.err{background:var(--bad-t);color:var(--bad)}
+
+/* plot */
+.plotbox{overflow-x:auto}
+.plotbox svg{display:block;width:100%;min-width:420px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;vertical-align:middle;margin-right:6px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.split div{background:var(--surface2);border-radius:8px;padding:10px 12px;font-size:14px}
+.split b{display:block;font-family:var(--f-display);font-size:15px}
+@media (max-width:560px){.split{grid-template-columns:1fr}}
+
+/* steps */
+.step{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px;min-width:0}
+.step.done{border-color:var(--ok)}
+.shead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.num{font-family:var(--f-display);font-weight:700;font-size:15px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--slate);color:var(--slate-ink);flex:none}
+.step.done .num{background:var(--ok);color:var(--surface)}
+.shead h2{flex:1;min-width:0}
+.badge{font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;background:var(--surface2);color:var(--muted)}
+.badge.done{background:var(--ok-t);color:var(--ok)}.badge.shown{background:var(--warn-t);color:var(--warn)}.badge.try{background:var(--bad-t);color:var(--bad)}
+.q{max-width:68ch}
+.math{font-family:var(--f-math);font-size:21px;line-height:1.4}
+.math sub,.math sup{font-size:.62em}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;line-height:1.2}
+.fr>span:first-child{border-bottom:1.5px solid currentColor;padding:0 4px 2px}
+.fr>span:last-child{padding:2px 4px 0}
+.formula{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:12px 16px;display:block;text-align:center}
+.formula .ln{display:block}
+.formula .sp{display:inline-block;width:32px}
+.fields{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.fld{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.fld .lab{font-family:var(--f-math);font-size:18px;color:var(--ink)}
+.fld .lab sub{font-size:.65em}
+.fld input,.ws input{font-family:var(--f-mono);font-size:16px;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:7px 10px;width:130px;font-variant-numeric:tabular-nums}
+.r-ok input,input.r-ok{border-color:var(--ok);background:var(--ok-t)}
+.r-close input,input.r-close{border-color:var(--warn);background:var(--warn-t)}
+.r-bad input,input.r-bad{border-color:var(--bad);background:var(--bad-t)}
+.r-shown input,input.r-shown{border-color:var(--warn);border-style:dashed}
+.r-empty input,input.r-empty{border-color:var(--bad);border-style:dashed}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.fb{font-size:14px;border-radius:8px;padding:9px 12px}
+.fb.ok{background:var(--ok-t);color:var(--ok)}.fb.bad{background:var(--bad-t);color:var(--bad)}.fb.warn{background:var(--warn-t);color:var(--warn)}
+.hint{font-size:14px;border-left:3px solid var(--warn);padding:4px 0 4px 12px;border-radius:0}
+.means{background:var(--accent-t);border-radius:10px;padding:12px 14px;font-size:15px}
+.means b{display:block;font-family:var(--f-display);color:var(--accent);font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
+.working{display:flex;flex-direction:column;align-items:center;gap:0}
+.wk{width:100%;max-width:640px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:grid;grid-template-columns:86px 1fr;gap:10px;align-items:center;background:var(--surface)}
+.wk .lbl{font-size:12px;color:var(--muted);font-weight:700;line-height:1.3}
+.wk .lbl span{display:block;font-weight:400}
+.stack{display:flex;flex-direction:column;gap:20px;width:100%}
+.stack>*,.wrap>*,.step>*,.panel>*,.wk>*{min-width:0}
+.wk .math,.formula{overflow-x:auto}
+.wk .math{display:block;text-align:center;font-size:19px}
+.wk.res{max-width:380px;border-color:var(--accent);background:var(--accent-t)}
+.wk.res .math{color:var(--accent);font-size:23px}
+.conn{width:2px;height:16px;background:var(--line)}
+.chip{border-radius:5px;padding:0 4px;background:var(--gt);color:var(--gc)}
+.wkhead{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice{text-align:left;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:10px 14px;font-size:15px}
+.choice:hover{border-color:var(--muted)}
+.choice.ok{border-color:var(--ok);background:var(--ok-t)}
+.choice.bad{border-color:var(--bad);background:var(--bad-t)}
+.choice .math{font-size:17px}
+.h0{font-family:var(--f-math);font-size:19px}
+.h0 sub{font-size:.62em}
+
+/* worksheet */
+.wsbox{overflow-x:auto}
+table.ws{border-collapse:separate;border-spacing:4px;font-variant-numeric:tabular-nums}
+.ws th{font-family:var(--f-display);font-size:14px;padding:6px 8px;border-radius:6px;white-space:nowrap}
+.ws th.gh{background:var(--gc);color:var(--surface)}
+.ws th.sub{background:var(--gt);color:var(--gc);font-family:var(--f-math);font-size:16px}
+.ws th.rl{font-family:var(--f-math);font-style:italic;font-size:17px;text-align:left;background:var(--slate);color:var(--slate-ink)}
+.ws th.tot{background:var(--slate);color:var(--slate-ink)}
+.ws td{text-align:center;padding:0}
+.ws td.x{background:var(--surface2);border-radius:6px;font-family:var(--f-mono);font-size:16px;padding:7px 10px;min-width:52px}
+.ws input{width:76px;text-align:center;padding:6px 4px}
+.ws td.wide input{width:100%;min-width:90px}
+
+/* F table */
+.ftwrap{max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+table.ft{border-collapse:collapse;width:100%;font-family:var(--f-mono);font-size:13px;font-variant-numeric:tabular-nums}
+.ft th,.ft td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--line)}
+.ft thead th{position:sticky;top:0;background:var(--slate);color:var(--slate-ink);z-index:1}
+.ft tbody th{background:var(--surface2);color:var(--muted);text-align:left}
+.ft .hl-c{background:var(--accent-t)}
+.ft .hl-r td,.ft .hl-r th{background:var(--accent-t)}
+.ft td.hit{background:var(--accent);color:var(--surface);font-weight:500}
+.alpha{display:inline-flex;gap:4px}
+
+/* summary */
+table.sum{width:100%;border-collapse:separate;border-spacing:4px;font-variant-numeric:tabular-nums}
+.sum th{font-size:13px;color:var(--muted);font-weight:700;text-align:center;padding:6px;border-bottom:1.5px solid var(--line)}
+.sum th:first-child{text-align:left}
+.sum td{text-align:center;padding:9px 6px;border-radius:8px;font-family:var(--f-mono);font-size:17px}
+.sum td.src{text-align:left;font-family:var(--f-display);font-size:15px;font-weight:700}
+.sum tr.b td{background:var(--g3t);color:var(--g3)}
+.sum tr.w td{background:var(--g2t);color:var(--g2)}
+.sum tr.t td{background:var(--surface2);color:var(--ink)}
+.sum td.e{background:transparent!important}
+.sum td.pending{opacity:.55}
+.writeup{font-family:var(--f-math);font-size:22px;text-align:center;padding:12px;border:1.5px solid var(--accent);border-radius:12px;color:var(--accent)}
+.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.checks div{background:var(--surface2);border-radius:8px;padding:8px 12px;font-size:14px}
+.checks b{display:block;font-size:12px;color:var(--muted)}
+footer{font-size:13px;color:var(--muted);text-align:center}
+@media (max-width:520px){ .panel,.step{padding:16px} .wk{grid-template-columns:1fr} .wk .lbl{text-align:center} .math{font-size:18px} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* modes */
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:4px}
+.tab{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:10px 12px;text-align:left;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tab b{font-family:var(--f-display);font-size:15px}
+.tab span{font-size:12.5px;color:var(--muted)}
+.tab:hover{border-color:var(--muted)}
+.tab.on{border-color:var(--slate);background:var(--slate);color:var(--slate-ink)}
+.tab.on span{color:var(--slate-ink);opacity:.8}
+@media (max-width:700px){.tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.probrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.probrow .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+.seen{font-size:12.5px;color:var(--muted)}
+/* read-only data tables for modes C and D */
+.dwrap{overflow-x:auto}
+table.dt{border-collapse:separate;border-spacing:4px;font-variant-numeric:tabular-nums}
+.dt th{font-family:var(--f-display);font-size:14px;padding:6px 10px;border-radius:6px;white-space:nowrap;background:var(--surface2);color:var(--ink)}
+.dt th.gh{background:var(--gc);color:var(--surface)}
+.dt th.rh{background:var(--gt);color:var(--gc);text-align:left}
+.dt th.corner{background:transparent}
+.dt td{text-align:center;background:var(--surface2);border-radius:6px;font-family:var(--f-mono);font-size:15px;padding:6px 12px;min-width:46px}
+.dt caption{caption-side:top;text-align:left;font-family:var(--f-display);font-weight:700;font-size:14px;padding:0 4px 4px;color:var(--muted)}
+.dtables{display:flex;flex-wrap:wrap;gap:18px}
+.explain{background:var(--surface2);border-radius:10px;padding:12px 14px;font-size:15px}
+.explain b{font-family:var(--f-display)}
+.ws td.s{background:var(--g4t);color:var(--g4)}
+.ws th.sh{background:var(--g4);color:var(--surface)}
+.ws th.ssub{background:var(--g4t);color:var(--g4);font-family:var(--f-math);font-size:16px}
+.sum tr.s td{background:var(--g4t);color:var(--g4)}
+.sum tr.e td{background:var(--g1t);color:var(--g1)}
+.sizes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:560px){.sizes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.sizes .choice{text-align:center}
+.estable{width:100%;border-collapse:separate;border-spacing:4px;font-size:14px}
+.estable td{background:var(--surface2);border-radius:6px;padding:6px 10px;text-align:center;font-variant-numeric:tabular-nums}
+.estable td:first-child{font-weight:700;text-align:left}
+[hidden]{display:none!important}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow" id="eyebrow">Practice</span>
+    <h1>ANOVA Exam Practice</h1>
+    <p class="lede">Pick a type of practice. Each one has four set problems, and <b>New problem</b> makes a fresh one with new numbers every time. Type your answer, press Check, and read what each step means.</p>
+    <div class="tabs" id="tabs" role="group" aria-label="Type of practice"></div>
+    <div class="progress"><div class="bar"><span id="pbar" style="width:0%"></span></div><span class="ptext" id="ptext"></span></div>
+    <nav class="nav" id="nav" aria-label="Steps"></nav>
+  </header>
+  <section class="panel" aria-labelledby="data-h">
+    <div class="panel-head"><h2 id="data-h">The problem</h2></div>
+    <div class="probrow" id="probrow"></div>
+    <div class="story" id="story"></div>
+    <div id="datatbl"></div>
+  </section>
+  <section class="panel" id="plotpanel" aria-labelledby="plot-h">
+    <div class="panel-head"><h2 id="plot-h">The data at a glance</h2></div>
+    <div class="plotbox" id="plot"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+  <div id="steps" class="stack"></div>
+  <footer>Answers within rounding of the exact value are marked correct. k = number of groups or conditions · s = number of people (within-subjects) · N or n<sub>total</sub> = total number of scores.</footer>
+</div>
+<script>
+function lgamma(x){const g=7,c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,-176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+  if(x<0.5)return Math.log(Math.PI/Math.sin(Math.PI*x))-lgamma(1-x);
+  x-=1;let a=c[0];const t=x+g+0.5;for(let i=1;i<9;i++)a+=c[i]/(x+i);
+  return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(a);}
+function betacf(a,b,x){const MAXIT=1000,EPS=3e-14,FPMIN=1e-300;let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;
+  if(Math.abs(d)<FPMIN)d=FPMIN;d=1/d;let h=d;
+  for(let m=1;m<=MAXIT;m++){const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<FPMIN)d=FPMIN;c=1+aa/c;if(Math.abs(c)<FPMIN)c=FPMIN;d=1/d;h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<FPMIN)d=FPMIN;c=1+aa/c;if(Math.abs(c)<FPMIN)c=FPMIN;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<EPS)break;}
+  return h;}
+function ibeta(x,a,b){if(x<=0)return 0;if(x>=1)return 1;
+  const bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));
+  return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;}
+function chi2cdf(x,k){ // regularized lower gamma P(k/2, x/2)
+  const a=k/2,z=x/2;if(z<=0)return 0;
+  if(z<a+1){let sum=1/a,del=sum,ap=a;for(let n=0;n<500;n++){ap+=1;del*=z/ap;sum+=del;if(Math.abs(del)<Math.abs(sum)*1e-15)break;}return sum*Math.exp(-z+a*Math.log(z)-lgamma(a));}
+  let b=z+1-a,c=1/1e-300,d=1/b,h=d;for(let i=1;i<500;i++){const an=-i*(i-a);b+=2;d=an*d+b;if(Math.abs(d)<1e-300)d=1e-300;c=b+an/c;if(Math.abs(c)<1e-300)c=1e-300;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<1e-15)break;}
+  return 1-Math.exp(-z+a*Math.log(z)-lgamma(a))*h;}
+function fcdf(x,d1,d2){if(x<=0)return 0;if(!isFinite(d2))return chi2cdf(x*d1,d1);return ibeta(d1*x/(d1*x+d2),d1/2,d2/2);}
+function fcrit(alpha,d1,d2){let lo=0,hi=1;while(fcdf(hi,d1,d2)<1-alpha)hi*=2;
+  for(let i=0;i<200;i++){const mid=(lo+hi)/2;if(fcdf(mid,d1,d2)<1-alpha)lo=mid;else hi=mid;}return (lo+hi)/2;}
+const TABLE_ROWS=[...Array.from({length:30},(_,i)=>i+1),40,60,120,Infinity];
+const TABLE_COLS=[1,2,3,4,5,6];
+function tableRowFor(dfw){let r=TABLE_ROWS[0];for(const t of TABLE_ROWS){if(t<=dfw)r=t;}return r;}
+
+/* ================= helpers ================= */
+const r2=x=>Math.round(x*100)/100;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function fmt(x){if(!isFinite(x))return "∞";const r=r2(x);return Number.isInteger(r)?r.toLocaleString("en-US"):r.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtIn(x){const r=r2(x);return Number.isInteger(r)?String(r):r.toFixed(2);}
+function num(s){const t=String(s).trim().replace(/,/g,"");if(t===""||!/^[-+]?(\d+\.?\d*|\.\d+)$/.test(t))return NaN;return parseFloat(t);}
+const frac=(t,b)=>`<span class="fr"><span>${t}</span><span>${b}</span></span>`;
+const ci=i=>"c"+(i%5+1);
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const pick=(a,rnd=Math.random)=>a[Math.floor(rnd()*a.length)];
+function shuffle(a,rnd=Math.random){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function listText(a){return a.length<=2?a.join(" and "):a.slice(0,-1).join(", ")+", and "+a[a.length-1];}
+const randn=()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
+function hash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36);}
+
+/* ================= ANOVA math ================= */
+function computeBS(p){
+  const G=p.groups.map((x,i)=>{const sq=x.map(v=>v*v);const sx=sum(x),sxx=sum(sq);return {name:p.names[i],x,sq,sx,sxx,n:x.length,mean:sx/x.length};});
+  const k=G.length,N=sum(G.map(g=>g.n)),SX=sum(G.map(g=>g.sx)),SXX=sum(G.map(g=>g.sxx));
+  const CT=SX*SX/N,sumGroup=sum(G.map(g=>g.sx*g.sx/g.n));
+  const SST=SXX-CT,SSB=sumGroup-CT,SSW=SST-SSB;
+  const dfB=k-1,dfW=N-k,dfT=N-1,MSB=SSB/dfB,MSW=SSW/dfW,F=MSB/MSW;
+  return {G,k,N,SX,SXX,CT,sumGroup,SST,SSB,SSW,dfB,dfW,dfT,MSB,MSW,F,grand:SX/N,eta:SSB/SST};
+}
+function computeWS(p){
+  const G=p.cols.map((x,i)=>{const sq=x.map(v=>v*v);const sx=sum(x),sxx=sum(sq);return {name:p.names[i],x,sq,sx,sxx,n:x.length,mean:sx/x.length};});
+  const k=G.length,n=G[0].n,N=k*n;
+  const P=Array.from({length:n},(_,r)=>sum(G.map(g=>g.x[r])));const P2=P.map(v=>v*v);
+  const SX=sum(G.map(g=>g.sx)),SXX=sum(G.map(g=>g.sxx)),SP2=sum(P2);
+  const CT=SX*SX/N,sumGroup=sum(G.map(g=>g.sx*g.sx/n)),sumPerson=SP2/k;
+  const SST=SXX-CT,SSB=sumGroup-CT,SSW=SST-SSB,SSS=sumPerson-CT,SSE=SSW-SSS;
+  const dfB=k-1,dfW=N-k,dfS=n-1,dfE=(k-1)*(n-1),dfT=N-1,MSB=SSB/dfB,MSE=SSE/dfE,F=MSB/MSE;
+  return {G,k,n,N,P,P2,SX,SXX,SP2,CT,sumGroup,sumPerson,SST,SSB,SSW,SSS,SSE,dfB,dfW,dfS,dfE,dfT,MSB,MSE,F,grand:SX/N};
+}
+
+/* ================= problem banks ================= */
+const BS_SCEN=[
+ {g:["4 hours sleep","6 hours sleep","8 hours sleep"],dv:"quiz score (out of 20)",st:"Students were randomly assigned to sleep 4, 6 or 8 hours before a 20-question quiz. Each student was in only one group."},
+ {g:["Phone in pocket","Phone on desk","Phone in other room"],dv:"problems solved (out of 20)",st:"Students solved math problems with their phone in their pocket, face-down on the desk or in another room. Each student was in only one condition."},
+ {g:["Praise","Criticism","No feedback"],dv:"puzzles completed (out of 20)",st:"After a warm-up, different participants received praise, criticism or no feedback. We counted how many of 20 puzzles each person completed."},
+ {g:["Dim light","Normal light","Bright light"],dv:"typos found (out of 20)",st:"Different participants proofread a page with 20 typos under dim, normal or bright light."},
+ {g:["No breakfast","Light breakfast","Full breakfast"],dv:"attention score (out of 20)",st:"Three separate groups of students skipped breakfast, ate a light breakfast or ate a full breakfast, then took a 20-point attention test."},
+ {g:["Alone","One watcher","Five watchers"],dv:"darts on target (out of 20)",st:"Participants threw 20 darts alone, with one person watching or with five people watching. Each person threw in only one condition."},
+ {g:["Re-reading","Highlighting","Self-quizzing"],dv:"test score (out of 20)",st:"Three groups of students prepared for a 20-point test by re-reading, highlighting or quizzing themselves."},
+ {g:["Walk outside","Walk indoors","Sit still"],dv:"creative ideas listed",st:"Before a creativity task, different participants walked outside, walked indoors or sat still for 10 minutes. We counted how many uses for a brick each person listed (up to 20)."},
+ {g:["Paper notes","Laptop notes","No notes"],dv:"facts recalled (out of 20)",st:"Students watched the same lecture while taking notes on paper, on a laptop or not at all. Each student was in only one group. Later they recalled as many of 20 facts as they could."},
+ {g:["Small class","Medium class","Large class"],dv:"times speaking up (out of 20 prompts)",st:"Students were placed in small, medium or large discussion sections. We counted how many of 20 prompts each student responded to."},
+ {g:["Cold room","Comfortable room","Hot room"],dv:"word puzzles solved (out of 20)",st:"Different participants solved word puzzles in a cold, comfortable or hot room."},
+ {g:["Plain text","Bullet points","Diagram"],dv:"instructions followed correctly (out of 20)",st:"Three groups read the same instructions written as plain text, as bullet points or as a diagram, then completed a 20-step task."}
+];
+const WS_SCEN=[
+ {g:["Morning","Afternoon","Evening"],dv:"reaction-game score (out of 20)",st:"The same students played a reaction game in the morning, afternoon and evening of one day."},
+ {g:["Library","Dorm room","Café"],dv:"focus rating (out of 20)",st:"Each student studied for an hour in the library, in their dorm room and in a café, on different days, and rated their focus each time."},
+ {g:["Quiet","Low music","Loud music"],dv:"puzzles solved (out of 20)",st:"The same participants solved puzzles in quiet, with low music and with loud music, in a different order for each person."},
+ {g:["Before the task","During the task","After a break"],dv:"calm rating (out of 20)",st:"Each participant rated how calm they felt before a stressful task, during it and after a short break."},
+ {g:["Week 1","Week 2","Week 3"],dv:"vocabulary quiz score (out of 20)",st:"The same students took a vocabulary quiz at the end of weeks 1, 2 and 3 of a language app trial."},
+ {g:["Lists of words","Lists of pictures","Lists of sounds"],dv:"items recalled (out of 20)",st:"Every participant studied a list of words, a list of pictures and a list of sounds, then recalled as many items as they could from each."},
+ {g:["Keyboard A","Keyboard B","Keyboard C"],dv:"error-free lines typed (out of 20)",st:"Each participant typed the same passage on three different keyboards, in a different order for each person."},
+ {g:["No warm-up","Short warm-up","Long warm-up"],dv:"free throws made (out of 20)",st:"The same players shot 20 free throws after no warm-up, a short warm-up and a long warm-up, on different days."},
+ {g:["Paper map","Phone map","No map"],dv:"landmarks found (out of 20)",st:"Every participant completed three similar campus scavenger hunts: once with a paper map, once with a phone map and once with no map."},
+ {g:["Monday","Wednesday","Friday"],dv:"energy rating (out of 20)",st:"The same students rated their energy at 9 a.m. on Monday, Wednesday and Friday of one week."}
+];
+const BS_PRESETS=[
+ {names:["Phone in pocket","Phone on desk","Phone in other room"],dv:"problems solved (out of 20)",story:"Twenty-one students solved math problems with their phone in their pocket, face-down on the desk or in another room. Each student was in only one condition (7 per group).",groups:[[2,8,8,11,3,7,8],[12,12,12,13,8,8,8],[9,14,11,10,13,12,18]]},
+ {names:["Dim light","Normal light","Bright light"],dv:"typos found (out of 20)",story:"Eighteen participants proofread a page with 20 typos under dim, normal or bright light (6 per group, different people in each).",groups:[[8,10,13,10,8,17],[12,10,6,12,10,7],[9,8,7,7,8,10]]},
+ {names:["No breakfast","Light breakfast","Full breakfast"],dv:"attention score (out of 20)",story:"Twenty-four students were randomly assigned to skip breakfast, eat a light breakfast or eat a full breakfast (8 per group), then took a 20-point attention test.",groups:[[11,12,11,8,9,7,5,7],[14,12,11,9,12,10,12,13],[4,10,6,8,7,13,12,11]]},
+ {names:["Alone","One watcher","Five watchers"],dv:"darts on target (out of 20)",story:"Twenty-one participants threw 20 darts alone, with one person watching or with five people watching. Each person threw in only one condition (7 per group).",groups:[[6,6,9,12,9,5,6],[9,11,9,8,8,9,7],[10,10,14,10,12,7,12]]}
+];
+const WS_PRESETS=[
+ {names:["Library","Dorm room","Café"],dv:"focus rating (out of 20)",story:"Seven students each studied for an hour in the library, in their dorm room and in a café, on different days, and rated their focus each time.",cols:[[11,11,15,16,13,16,9],[9,10,11,13,8,12,7],[12,13,12,13,12,12,8]]},
+ {names:["Morning","Afternoon","Evening"],dv:"reaction-game score (out of 20)",story:"Six students played the same reaction game in the morning, afternoon and evening of one day.",cols:[[8,13,6,11,5,7],[7,13,7,9,6,8],[11,12,8,11,8,8]]},
+ {names:["Quiet","Low music","Loud music"],dv:"puzzles solved (out of 20)",story:"Eight participants each solved puzzles in quiet, with low music and with loud music, in a different order for each person.",cols:[[10,12,11,13,6,9,8,8],[7,11,12,9,8,5,7,4],[10,11,13,12,9,8,8,10]]},
+ {names:["Before the task","During the task","After a break"],dv:"calm rating (out of 20)",story:"Seven participants rated how calm they felt before a stressful task, during it and after a short break.",cols:[[12,9,12,11,8,9,11],[10,4,3,10,5,6,7],[15,12,9,11,9,10,10]]}
+];
+const FACTORS=[
+ {f:"Caffeine",lv:["None","Low","Medium","High"]},{f:"Time of day",lv:["Morning","Midday","Afternoon","Evening"]},
+ {f:"Class size",lv:["Small","Medium","Large","Very large"]},{f:"Feedback",lv:["Praise","Criticism","None","Mixed"]},
+ {f:"Study method",lv:["Re-reading","Highlighting","Self-quizzing","Flashcards"]},{f:"Background noise",lv:["Silence","White noise","Music","Talking"]},
+ {f:"Screen time",lv:["0 hours","1 hour","2 hours","3 hours"]},{f:"Exercise",lv:["None","Walk","Jog","Run"]},
+ {f:"Group size",lv:["Alone","Pair","Trio","Four people"]},{f:"Reward",lv:["None","Small","Medium","Large"]},
+ {f:"Lighting",lv:["Dim","Normal","Bright","Very bright"]},{f:"Font",lv:["Serif","Sans-serif","Handwritten","Bold"]}
+];
+const DVS=["test score","mood rating","words recalled","reaction time","problems solved","focus rating","creativity score","errors made"];
+const WHO=["students","participants","adults","volunteers","employees","athletes"];
+const CORR=[["hours of sleep","exam score"],["daily screen time","sleep quality"],["hours worked per week","stress rating"],["number of friends","loneliness score"],["minutes of exercise per day","mood rating"],["years of music training","memory score"],["caffeine per day (mg)","anxiety score"],["commute time","job satisfaction"],["social media use","self-esteem score"],["hours studied","quiz score"]];
+const TESTS=["One-way between-subjects ANOVA","One-way within-subjects ANOVA","Two-way between-subjects ANOVA","Two-way within-subjects ANOVA","Two-way mixed ANOVA","Correlation"];
+
+/* ================= seen problems (never repeat) ================= */
+let SEEN=new Set();
+try{const a=JSON.parse(localStorage.getItem("ex3Seen")||"[]");if(Array.isArray(a))SEEN=new Set(a);}catch(e){}
+function saveSeen(){try{localStorage.setItem("ex3Seen",JSON.stringify([...SEEN].slice(-3000)));}catch(e){}}
+const sigOf=p=>hash(p.kind+"|"+JSON.stringify(p.groups||p.cols||(p.tables?[p.text,p.tables]:p.text)));
+const BLOCKED=new Set([...BS_PRESETS.map(p=>sigOf({kind:"bs",...p})),...WS_PRESETS.map(p=>sigOf({kind:"ws",...p})),"1r3c58z","3qeah"]);
+function fresh(gen){for(let t=0;t<400;t++){const p=gen();if(!p)continue;const s=sigOf(p);if(SEEN.has(s)||BLOCKED.has(s))continue;SEEN.add(s);saveSeen();return p;}return null;}
+
+/* ================= generators ================= */
+let lastScen={bs:-1,ws:-1};
+function genBS(){
+  let si;do{si=Math.floor(Math.random()*BS_SCEN.length);}while(si===lastScen.bs);lastScen.bs=si;const sc=BS_SCEN[si];
+  const n=pick([6,7,8]);const d=pick([0,0.5,1,1.5,2,2.5,3]),sd=2+Math.random()*1.2,m0=8+Math.random()*4;
+  const means=shuffle([m0-d,m0,m0+d]).map(m=>m+(Math.random()-.5)*1.2);
+  const groups=means.map(m=>Array.from({length:n},()=>clamp(Math.round(m+randn()*sd),1,20)));
+  if(groups.some(g=>new Set(g).size<2))return null;const C=computeBS({names:sc.g,groups});if(!isFinite(C.F)||C.SSW<=0)return null;
+
+  return {kind:"bs",names:sc.g,dv:sc.dv,story:`${sc.st} There are ${n} people per group (${3*n} in total).`,groups};
+}
+function genWS(){
+  let si;do{si=Math.floor(Math.random()*WS_SCEN.length);}while(si===lastScen.ws);lastScen.ws=si;const sc=WS_SCEN[si];
+  const n=pick([6,7,8]);const d=pick([0,0.5,1,1.5,2,2.5]),sd=1+Math.random()*1.2;
+  const base=Array.from({length:n},()=>7+Math.random()*7);const eff=shuffle([-d,0,d]);
+  const cols=eff.map(e=>base.map(b=>clamp(Math.round(b+e+randn()*sd),1,20)));
+  const C=computeWS({names:sc.g,cols});if(!isFinite(C.F)||C.SSE<=0)return null;
+  return {kind:"ws",names:sc.g,dv:sc.dv,story:`${sc.st} There are ${n} people, and each one has a score in every condition.`,cols};
+}
+function makeOpts(correct,cands,rnd=Math.random){const set=[correct];for(const c of shuffle(cands,rnd)){if(set.length>=4)break;if(!set.includes(c))set.push(c);}
+  while(set.length<4){const a=2+Math.floor(rnd()*3),b=2+Math.floor(rnd()*3);const c=`${a} × ${b}`;if(!set.includes(c))set.push(c);}
+  const o=shuffle(set,rnd);return {opts:o,ok:o.indexOf(correct)};}
+function genCount(){
+  const v=pick(["owbs","owws","tw","tw","thw"]);
+  if(v==="owbs"||v==="owws"){
+    const k=pick([2,3,4,5]),n=pick([4,5,6,7,8]);const F=pick(FACTORS);const lv=F.lv.concat(["Control"]).slice(0,k);const dv=pick(DVS);
+    const base=Array.from({length:n},()=>4+Math.random()*10);
+    const cells=Array.from({length:n},(_,r)=>lv.map(()=>clamp(Math.round(base[r]+randn()*2.5),1,20)));
+    const tbl={caption:v==="owbs"?`${dv[0].toUpperCase()+dv.slice(1)}. Each column is a different group of people.`:`${dv[0].toUpperCase()+dv.slice(1)}. Each row is one person, measured in every condition.`,colHead:lv,rowHead:v==="owws"?Array.from({length:n},(_,r)=>"Person "+(r+1)):null,cells,factor:F.f};
+    const correct=`One-way, ${k} levels`;const {opts,ok}=makeOpts(correct,[`One-way, ${n} levels`,`${k} × ${n}`,`${n} × ${k}`,`One-way, ${k*n} levels`,`Two-way, ${k} × 2`]);
+    return {kind:"count",variant:v,text:v==="owbs"?`A researcher compared ${F.f.toLowerCase()} conditions. Different people were in each group.`:`A researcher measured the same people under every ${F.f.toLowerCase()} condition.`,
+      tables:[tbl],ans:{ivs:1,groups:k,N:v==="owbs"?k*n:n},Nlabel:"Total number of participants",nameOpts:opts,nameOk:ok,
+      why:v==="owbs"?`One IV (${F.f.toLowerCase()}) with ${k} levels, so ${k} groups. Each column holds different people: ${k} × ${n} = ${k*n} participants.`:`One IV (${F.f.toLowerCase()}) with ${k} levels, so ${k} conditions. The same ${n} people appear in every column, so there are only ${n} participants (${k*n} scores in all).`};
+  }
+  const [FA,FB,FC]=shuffle(FACTORS).slice(0,3);const m=pick([4,5,6,8,10]);const dv=pick(DVS);
+  const cellVal=()=>clamp(Math.round(10+randn()*3.5),2,20);
+  if(v==="tw"){const p=pick([2,3,4]),q=pick([2,3,4]);const rows=FA.lv.slice(0,p),cols=FB.lv.slice(0,q);
+    const cells=rows.map(()=>cols.map(cellVal));const correct=`${p} × ${q}`;
+    const {opts,ok}=makeOpts(correct,[`One-way, ${p*q} levels`,`${p} × ${q} × ${m}`,`${p+q} × 2`,`${p} × ${p*q}`,`${q+1} × ${p+1}`]);
+    return {kind:"count",variant:v,text:`Mean ${dv} for each group. Different people were in every cell, with ${m} people per cell.`,tables:[{caption:`Rows: ${FA.f} · Columns: ${FB.f}`,colHead:cols,rowHead:rows,cells}],
+      ans:{ivs:2,groups:p*q,N:p*q*m},Nlabel:"Total number of participants",nameOpts:opts,nameOk:ok,why:`Two IVs: ${FA.f.toLowerCase()} (${p} levels) and ${FB.f.toLowerCase()} (${q} levels). ${p} × ${q} = ${p*q} groups, and ${p*q} × ${m} = ${p*q*m} participants.`};}
+  const q=pick([2,3]),r=pick([2,3,4]);const lvA=FA.lv.slice(0,2),rows=FB.lv.slice(0,q),cols=FC.lv.slice(0,r);
+  const tables=lvA.map(a=>({caption:`${FA.f}: ${a} · Rows: ${FB.f} · Columns: ${FC.f}`,colHead:cols,rowHead:rows,cells:rows.map(()=>cols.map(cellVal))}));
+  const cells=2*q*r;const correct=`2 × ${q} × ${r}`;const {opts,ok}=makeOpts(correct,[`${q} × ${r}`,`One-way, ${cells} levels`,`2 × ${q*r}`,`2 × ${q} × ${r} × ${m}`,`${q} × ${r} × ${r}`]);
+  return {kind:"count",variant:v,text:`Mean ${dv} for each group, split across two tables. Different people were in every cell, with ${m} people per cell.`,tables,
+    ans:{ivs:3,groups:cells,N:cells*m},Nlabel:"Total number of participants",nameOpts:opts,nameOk:ok,why:`Three IVs: ${FA.f.toLowerCase()} (2 levels, one per table), ${FB.f.toLowerCase()} (${q} levels) and ${FC.f.toLowerCase()} (${r} levels). 2 × ${q} × ${r} = ${cells} groups, and ${cells} × ${m} = ${cells*m} participants.`};
+}
+function genTest(){
+  const t=Math.floor(Math.random()*6);const who=pick(WHO),dv=pick(DVS);const [A,B]=shuffle(FACTORS).slice(0,2);
+  const ka=pick([2,3,4]),kb=pick([2,3]);const la=A.lv.slice(0,ka).map(s=>s.toLowerCase()),lb=B.lv.slice(0,kb).map(s=>s.toLowerCase());const n=pick([10,12,15,20,24,30]);
+  let text,ivs,people;
+  if(t===0){text=pick([`A researcher wants to know whether ${A.f.toLowerCase()} affects ${dv}. ${n*ka} ${who} are randomly split into ${ka} groups (${listText(la)}). Each person is measured once.`,`${n*ka} ${who} are randomly assigned to one ${A.f.toLowerCase()} condition: ${listText(la)}. The researcher compares ${dv} across the ${ka} groups.`]);ivs=1;people=0;}
+  else if(t===1){text=pick([`A researcher wants to know whether ${A.f.toLowerCase()} affects ${dv}. ${n} ${who} each complete the task under all ${ka} conditions (${listText(la)}), in a different order, and ${dv} is recorded every time.`,`The same ${n} ${who} are measured on ${dv} under ${listText(la)} ${A.f.toLowerCase()}. The researcher compares the ${ka} conditions.`]);ivs=1;people=1;}
+  else if(t===2){text=`A researcher studies how ${A.f.toLowerCase()} (${listText(la)}) and ${B.f.toLowerCase()} (${listText(lb)}) affect ${dv}. ${n*ka*kb} ${who} are randomly assigned to one of the ${ka*kb} combinations, and each person is measured once.`;ivs=2;people=0;}
+  else if(t===3){text=`${n} ${who} each complete every combination of ${A.f.toLowerCase()} (${listText(la)}) and ${B.f.toLowerCase()} (${listText(lb)}), ${ka*kb} sessions in all. The researcher records ${dv} in each session.`;ivs=2;people=1;}
+  else if(t===4){text=`${n*ka} ${who} are randomly assigned to one ${A.f.toLowerCase()} condition (${listText(la)}). Every person is then tested under each level of ${B.f.toLowerCase()} (${listText(lb)}), and ${dv} is recorded each time.`;ivs=2;people=2;}
+  else{const [v1,v2]=pick(CORR);text=pick([`A researcher records ${v1} and ${v2} for ${n*3} ${who}. They want to know whether people with higher ${v1} also tend to have higher (or lower) ${v2}. Nobody is put into groups.`,`For ${n*3} ${who}, a researcher measures ${v1} and ${v2}. The question is whether the two measures go up and down together.`]);ivs=0;people=3;}
+  return {kind:"test",text,ivs,people,ans:t};
+}
+
+/* ================= state ================= */
+const MODES=[["bs","Between-subjects","One-way ANOVA, different people"],["ws","Within-subjects","One-way ANOVA, same people"],["count","How many groups?","Read a table or design"],["test","Which test?","Match a study to its test"]];
+const PRESET_COUNT=[
+ {kind:"count",variant:"owbs",text:"A researcher compared study-method conditions. Different people were in each group.",tables:[{caption:"Test score. Each column is a different group of people.",colHead:["Re-reading","Highlighting","Self-quizzing","Flashcards"],rowHead:null,cells:[[12,10,15,14],[9,11,16,12],[13,8,14,15],[10,12,17,13],[11,9,15,16]]}],ans:{ivs:1,groups:4,N:20},Nlabel:"Total number of participants",nameOpts:["4 × 5","One-way, 4 levels","One-way, 20 levels","Two-way, 4 × 2"],nameOk:1,why:"One IV (study method) with 4 levels, so 4 groups. Each column holds different people: 4 × 5 = 20 participants."},
+ {kind:"count",variant:"owws",text:"A researcher measured the same people under every lighting condition.",tables:[{caption:"Focus rating. Each row is one person, measured in every condition.",colHead:["Dim","Normal","Bright"],rowHead:["Person 1","Person 2","Person 3","Person 4","Person 5","Person 6"],cells:[[8,11,12],[6,9,10],[10,12,15],[7,8,11],[9,13,13],[5,9,10]]}],ans:{ivs:1,groups:3,N:6},Nlabel:"Total number of participants",nameOpts:["One-way, 6 levels","3 × 6","One-way, 3 levels","One-way, 18 levels"],nameOk:2,why:"One IV (lighting) with 3 levels, so 3 conditions. The same 6 people appear in every column, so there are only 6 participants (18 scores in all)."},
+ {kind:"count",variant:"tw",text:"Mean words recalled for each group. Different people were in every cell, with 5 people per cell.",tables:[{caption:"Rows: Background noise · Columns: Time of day",colHead:["Morning","Midday","Afternoon"],rowHead:["Silence","Music"],cells:[[14,12,11],[10,11,8]]}],ans:{ivs:2,groups:6,N:30},Nlabel:"Total number of participants",nameOpts:["2 × 3","One-way, 6 levels","2 × 3 × 5","5 × 2"],nameOk:0,why:"Two IVs: background noise (2 levels) and time of day (3 levels). 2 × 3 = 6 groups, and 6 × 5 = 30 participants."},
+ {kind:"count",variant:"thw",text:"Mean problems solved for each group, split across two tables. Different people were in every cell, with 4 people per cell.",tables:[{caption:"Caffeine: None · Rows: Exercise · Columns: Screen time",colHead:["0 hours","1 hour","2 hours"],rowHead:["None","Walk"],cells:[[11,10,8],[13,12,9]]},{caption:"Caffeine: High · Rows: Exercise · Columns: Screen time",colHead:["0 hours","1 hour","2 hours"],rowHead:["None","Walk"],cells:[[14,12,10],[15,15,11]]}],ans:{ivs:3,groups:12,N:48},Nlabel:"Total number of participants",nameOpts:["2 × 6","2 × 2 × 3","2 × 3","One-way, 12 levels"],nameOk:1,why:"Three IVs: caffeine (2 levels, one per table), exercise (2 levels) and screen time (3 levels). 2 × 2 × 3 = 12 groups, and 12 × 4 = 48 participants."}
+];
+const PRESET_TEST=[
+ {kind:"test",text:"45 students are randomly assigned to study with re-reading, highlighting or self-quizzing. Each student uses only one method, and the researcher compares test scores across the 3 groups.",ivs:1,people:0,ans:0},
+ {kind:"test",text:"The same 12 athletes run a timed lap after no warm-up, a short warm-up and a long warm-up, on different days. The researcher compares lap times across the 3 warm-ups.",ivs:1,people:1,ans:1},
+ {kind:"test",text:"60 participants are randomly assigned to work in silence or with music. Every person then completes a memory task in the morning, at midday and in the evening, and words recalled are recorded each time.",ivs:2,people:2,ans:4},
+ {kind:"test",text:"A researcher records daily minutes of exercise and a mood rating for 40 adults. They want to know whether people who exercise more also tend to report better moods. Nobody is put into groups.",ivs:0,people:3,ans:5}
+];
+const PRESETS={bs:BS_PRESETS.map(p=>({kind:"bs",...p})),ws:WS_PRESETS.map(p=>({kind:"ws",...p})),count:PRESET_COUNT,test:PRESET_TEST};
+const GEN={bs:genBS,ws:genWS,count:genCount,test:genTest};
+const newMS=()=>({pi:0,prob:null,ans:{},res:{},status:{},fb:{},hint:{},choice:{}});
+let S={mode:"bs",alpha:0.05,m:{bs:newMS(),ws:newMS(),count:newMS(),test:newMS()},madeCount:0};
+Object.keys(S.m).forEach(k=>S.m[k].prob=PRESETS[k][0]);
+try{const md=localStorage.getItem("ex3Mode");if(md&&S.m[md])S.mode=md;}catch(e){}
+const M=()=>S.m[S.mode];
+function clearAnswers(){const m=M();m.ans={};m.res={};m.status={};m.fb={};m.hint={};m.choice={};}
+
+/* ================= step UI ================= */
+let FIELDS={},CHOICES={},STEPS=[];
+function field(step,fid,val,label){(FIELDS[step]=FIELDS[step]||[]).push({fid,val});const m=M();const r=m.res[fid]?"r-"+m.res[fid]:"";
+  return `<label class="fld ${r}" for="a-${fid}">${label?`<span class="lab">${label}</span>`:""}<input id="a-${fid}" data-fid="${fid}" data-step="${step}" inputmode="decimal" autocomplete="off" value="${esc(m.ans[fid]??"")}"></label>`;}
+function cellField(step,fid,val,label){(FIELDS[step]=FIELDS[step]||[]).push({fid,val});const m=M();const r=m.res[fid]?"r-"+m.res[fid]:"";
+  return `<input id="a-${fid}" class="${r}" data-fid="${fid}" data-step="${step}" inputmode="decimal" autocomplete="off" aria-label="${label}" value="${esc(m.ans[fid]??"")}">`;}
+const isDone=id=>M().status[id]==="done"||M().status[id]==="shown";
+function wk(label,sub,math,res){return `<div class="wk ${res?"res":""}"><div class="lbl">${label}<span>${sub}</span></div><div class="math">${math}</div></div>`;}
+const conn='<div class="conn"></div>';
+const gm=(i,v)=>`<span class="chip ${ci(i)}">${v}</span>`;
+function choiceList(id,opts,okIdx,badMsg,cls="choices"){CHOICES[id]={ok:okIdx,bad:badMsg};const m=M();const ch=m.choice[id];
+  return `<div class="${cls}">${opts.map((o,j)=>`<button class="choice ${ch===j?(j===okIdx?"ok":"bad"):""} ${m.status[id]==="shown"&&j===okIdx?"ok":""}" data-choice="${id}" data-j="${j}">${o}</button>`).join("")}</div>`;}
+function stepCard(n,id,title,q,body,meaning,hint,working,opts={}){
+  const m=M();const st=m.status[id]||"";const lbl={done:"Correct",shown:"Answer shown",try:"Keep going"}[st]||"To do";const fb=m.fb[id];
+  return `<section class="step ${st}" id="step-${id}" aria-labelledby="h-${id}">
+    <div class="shead"><span class="num">${n}</span><h2 id="h-${id}">${title}</h2><span class="badge ${st}">${lbl}</span></div>
+    ${q?`<p class="q">${q}</p>`:""}${body}
+    ${opts.noActions?"":`<div class="actions">${opts.choice?"":`<button class="btn primary" data-check="${id}">Check</button>`}<button class="btn" data-hint="${id}">${m.hint[id]?"Hide hint":"Hint"}</button><button class="btn ghost" data-show="${id}">Show answer</button></div>`}
+    ${fb?`<div class="fb ${fb.k}" role="status">${fb.t}</div>`:""}
+    ${m.hint[id]?`<p class="hint">${hint}</p>`:""}
+    ${working&&isDone(id)?`<div class="wkhead">Worked solution</div><div class="working">${working}</div>`:""}
+    ${meaning?`<aside class="means"><b>What this step means</b>${meaning}</aside>`:""}</section>`;
+}
+function fTableHTML(dfB,dfDen,showHL,denLabel){
+  const row=tableRowFor(dfDen);const cols=TABLE_COLS.includes(dfB)?TABLE_COLS:[...TABLE_COLS,dfB];
+  let ft=`<div class="ftwrap" id="ftwrap"><table class="ft"><thead><tr><th style="white-space:nowrap">df ↓${denLabel} · between→</th>${cols.map(c=>`<th style="${showHL&&c===dfB?"background:var(--accent);color:var(--surface)":""}">${c}</th>`).join("")}</tr></thead><tbody>`;
+  TABLE_ROWS.forEach(rw=>{const hit=showHL&&rw===row;ft+=`<tr class="${hit?"hl-r":""}" ${hit?'id="ft-hit"':""}><th>${isFinite(rw)?rw:"∞"}</th>${cols.map(c=>{const val=fcrit(S.alpha,c,rw).toFixed(2);const isHit=hit&&c===dfB;return `<td class="${isHit?"hit":(showHL&&c===dfB?"hl-c":"")}">${val}</td>`;}).join("")}</tr>`;});
+  return ft+`</tbody></table></div>`+(row!==dfDen?`<p class="note">Your df ${denLabel} is ${dfDen}, which isn't a row in the table. Use the next smaller row (${isFinite(row)?row:"∞"}).</p>`:"");
+}
+const alphaBtns=()=>`<div class="actions"><span class="small muted" style="align-self:center">Significance level</span><span class="alpha"><button class="btn ${S.alpha===0.05?"on":""}" data-alpha="0.05">α = .05</button><button class="btn ${S.alpha===0.01?"on":""}" data-alpha="0.01">α = .01</button></span></div>`;
+function hypStep(n,names,dvs){
+  const mus=names.map(nm=>`μ<sub>${esc(nm)}</sub>`);
+  const opts=[`<span class="math">H<sub>1</sub>: ${mus.join(" ≠ ")}</span><br><span class="small muted">Every average is different from every other one.</span>`,
+              `<span class="math">H<sub>1</sub>: at least one μ is different</span><br><span class="small muted">At least one average is different from the others.</span>`,
+              `<span class="math">H<sub>1</sub>: ${mus.join(" = ")}</span><br><span class="small muted">All averages are the same.</span>`];
+  return stepCard(n,"hyp","State the hypotheses",`The null hypothesis (H₀) is given. Pick the correct alternative hypothesis (H₁).`,
+    `<div class="formula"><span class="h0">H<sub>0</sub>: ${mus.join(" = ")}</span></div>`+choiceList("hyp",opts,1,"Not quite. ANOVA can't show that every average differs from every other. Try again."),
+    `H₀ says the IV makes no difference to ${esc(dvs)}. H₁ only claims that at least one average differs. ANOVA can't tell you which one.`,
+    `Which option makes the smallest claim?`,"",{choice:true});
+}
+function decisionStep(n,C,fcVal,ready,denName){
+  const reject=C.F>fcVal;
+  const opts=[`<b>Reject H₀</b><br><span class="small muted">At least one average is significantly different from the others.</span>`,`<b>Fail to reject H₀</b><br><span class="small muted">There isn't enough evidence that the averages differ.</span>`];
+  return stepCard(n,"dec","Make the decision",ready?`Your F is ${fmt(C.F)} and F critical is ${fmt(fcVal)}. What do you conclude?`:`Finish the df step and the F step first.`,
+    ready?`<div class="formula math">F = ${fmt(C.F)} &nbsp; vs. &nbsp; F<sub>critical</sub> = ${fmt(fcVal)}</div>`+choiceList("dec",opts,reject?0:1,"Not quite. Compare F with F critical again."):"",
+    `If F is bigger than F critical, reject H₀: the averages differ more than luck would explain. If not, fail to reject H₀. That doesn't prove the averages are equal. A significant result doesn't say which groups differ either; that takes a post-hoc test.`,
+    `Is F bigger than F critical?`,"",{choice:true,noActions:!ready});
+}
+function sumTable(rows,writeup,meaning){
+  return `<section class="step" id="step-sum"><div class="shead"><span class="num">✓</span><h2>Summary table</h2></div>
+    <p class="q">Cells fill in as you complete each step.</p><div class="wsbox"><table class="sum"><tr><th>Source</th><th>Sum of squares</th><th>df</th><th>Mean squares</th><th>F</th></tr>${rows}</table></div>
+    ${writeup||""}<aside class="means"><b>What this table means</b>${meaning}</aside></section>`;
+}
+const cell=(id,v)=>isDone(id)?`<td>${fmt(v)}</td>`:`<td class="pending">?</td>`;
+
+/* ---------- mode: between ---------- */
+function renderBS(p){
+  const C=computeBS(p);window.__C=C;const names=C.G.map(g=>esc(g.name));const k=C.k,N=C.N;let h="";
+  STEPS=[["hyp","Hypotheses"],["dfc","df and F critical"],["ws","Worksheet"],["sst","SS total"],["ssb","SS between"],["ssw","SS within"],["ms","Mean squares"],["f","F"],["dec","Decision"],["eta","Effect size"],["size","How big?"]];
+  h+=hypStep(1,C.G.map(g=>g.name),p.dv);
+  const row=tableRowFor(C.dfW);const fcVal=r2(fcrit(S.alpha,C.dfB,row));
+  h+=stepCard(2,"dfc","Degrees of freedom and F critical",`k = number of groups (${k}), N = total number of people. Work out the df, then use df between (column) and df within (row) to find F critical.`,
+    `<div class="formula math"><span class="ln">df<sub>between</sub> = k − 1</span><span class="ln">df<sub>within</sub> = N − k</span><span class="ln">df<sub>total</sub> = N − 1</span></div>
+     <div class="fields">${field("dfc","dfb",C.dfB,"df<sub>between</sub> =")}${field("dfc","dfw",C.dfW,"df<sub>within</sub> =")}${field("dfc","dft",C.dfT,"df<sub>total</sub> =")}</div>${alphaBtns()}
+     ${fTableHTML(C.dfB,C.dfW,isDone("dfc"),"within")}<div class="fields">${field("dfc","fc",fcVal,"F<sub>critical</sub> =")}</div>`,
+    `df between is the numerator df and df within is the denominator df. F critical is the cutoff F has to beat. Check: df between + df within = df total.`,
+    `There are ${k} groups and ${N} people in total. Column = df between, row = df within.`,
+    wk("Between","k − 1",`df<sub>between</sub> = ${k} − 1 = ${C.dfB}`)+conn+wk("Within","N − k",`df<sub>within</sub> = ${N} − ${k} = ${C.dfW}`)+conn+wk("Total","N − 1",`df<sub>total</sub> = ${N} − 1 = ${C.dfT}`)+conn+wk("Look up",`Column ${C.dfB}, row ${isFinite(row)?row:"∞"}`,`F<sub>critical</sub>(${C.dfB}, ${C.dfW}) = ${fmt(fcVal)}`,true));
+  const maxn=Math.max(...C.G.map(g=>g.n));
+  let t=`<div class="wsbox"><table class="ws"><thead><tr><th></th>${C.G.map((g,i)=>`<th colspan="2" class="gh ${ci(i)}">${names[i]}</th>`).join("")}<th></th></tr><tr><th></th>${C.G.map((g,i)=>`<th class="sub ${ci(i)}"><i>X</i></th><th class="sub ${ci(i)}"><i>X</i>²</th>`).join("")}<th></th></tr></thead><tbody>`;
+  for(let r=0;r<maxn;r++)t+=`<tr><th></th>${C.G.map((g,i)=>r<g.n?`<td class="x">${fmt(g.x[r])}</td><td>${cellField("ws",`x2-${i}-${r}`,g.sq[r],`${names[i]} score ${r+1} squared`)}</td>`:`<td></td><td></td>`).join("")}<td></td></tr>`;
+  t+=`<tr><td colspan="${2*k+2}" style="height:8px"></td></tr><tr><th></th>${C.G.map(()=>`<td colspan="2"></td>`).join("")}<th class="tot">Total</th></tr>`;
+  [["ΣX","sx",C.SX],["ΣX²","sxx",C.SXX],["n","n",C.N]].forEach(([lab,key,tot])=>{t+=`<tr><th class="rl">${lab}</th>${C.G.map((g,i)=>`<td colspan="2" class="wide">${cellField("ws",`${key}-${i}`,g[key],`${lab} for ${names[i]}`)}</td>`).join("")}<td class="wide">${cellField("ws",`t${key}`,tot,`Total ${lab}`)}</td></tr>`;});
+  t+=`</tbody></table></div>`;
+  h+=stepCard(3,"ws","Fill in the worksheet",`Square every score (X²). For each group, add the scores (ΣX), add the squared scores (ΣX²) and count the people (n). Then total across groups.`,t,
+    `Every formula after this uses only these totals. ΣX² means square first, then add. (ΣX)² means add first, then square.`,`Square each score (9² = 81). For the Total column, add across the row.`,
+    C.G.map((g,i)=>wk(`<span style="color:var(--g${i%5+1})">${names[i]}</span>`,"",`<span style="font-size:15px;font-family:var(--f-mono)">ΣX = <b>${fmt(g.sx)}</b> · ΣX² = <b>${fmt(g.sxx)}</b> · n = <b>${g.n}</b></span>`)).join(conn)+conn+wk("Totals","",`<span style="font-size:15px;font-family:var(--f-mono)">ΣX<sub>total</sub> = <b>${fmt(C.SX)}</b> · ΣX²<sub>total</sub> = <b>${fmt(C.SXX)}</b> · N = <b>${C.N}</b></span>`,true));
+  h+=sstStep(4,C);h+=ssbStep(5,C,"n");
+  h+=stepCard(6,"ssw","SS within",`What's left after taking out the between part.`,`<div class="formula math">SS<sub>within</sub> = SS<sub>total</sub> − SS<sub>between</sub></div><div class="fields">${field("ssw","ssw",C.SSW,"SS<sub>within</sub> =")}</div>`,
+    `Differences between people in the same group. The IV can't explain them, so this is the noise.`,`SS total minus SS between.`,wk("Plug in","",`SS<sub>within</sub> = ${fmt(C.SST)} − ${fmt(C.SSB)}`)+conn+wk("Subtract","",`SS<sub>within</sub> = ${fmt(C.SSW)}`,true));
+  h+=stepCard(7,"ms","Mean squares",`Divide each SS by its df.`,`<div class="formula math"><span style="white-space:nowrap;display:inline-block">MS<sub>between</sub> = ${frac("SS<sub>between</sub>","df<sub>between</sub>")}</span><span class="sp"></span><span style="white-space:nowrap;display:inline-block">MS<sub>within</sub> = ${frac("SS<sub>within</sub>","df<sub>within</sub>")}</span></div><div class="fields">${field("ms","msb",C.MSB,"MS<sub>between</sub> =")}${field("ms","msw",C.MSW,"MS<sub>within</sub> =")}</div>`,
+    `Dividing by df turns each total into an average so they can be compared fairly. MS between is the signal and MS within is the noise.`,`Keep two decimals.`,
+    wk("Between","SS ÷ df",`MS<sub>between</sub> = ${frac(fmt(C.SSB),C.dfB)} = ${fmt(C.MSB)}`)+conn+wk("Within","SS ÷ df",`MS<sub>within</sub> = ${frac(fmt(C.SSW),C.dfW)} = ${fmt(C.MSW)}`,true));
+  h+=fStep(8,C,C.MSW,"within");
+  h+=decisionStep(9,C,fcVal,isDone("f")&&isDone("dfc"));
+  h+=stepCard(10,"eta","Effect size (η²)",`Significance says whether there is an effect. η² says how big it is: the share of all the variability that the IV explains.`,
+    `<div class="formula math">η<sup>2</sup> = ${frac("SS<sub>between</sub>","SS<sub>total</sub>")}</div><div class="fields">${field("eta","eta",C.eta,"η<sup>2</sup> =")}</div>`,
+    `η² runs from 0 to 1. Multiply by 100 to read it as a percent: here the IV accounts for about ${Math.round(C.eta*100)}% of the variability in ${esc(p.dv)}.`,`Divide SS between by SS total. Give two decimals.`,
+    wk("Plug in","",`η<sup>2</sup> = ${frac(fmt(C.SSB),fmt(C.SST))}`)+conn+wk("Divide","",`η<sup>2</sup> = ${fmt(C.eta)}`,true));
+  const sz=C.eta<0.01?0:C.eta<0.10?1:C.eta<=0.25?2:3;
+  h+=stepCard(11,"size","How big is the effect?",isDone("eta")?`η² = ${fmt(C.eta)}. Use the table to describe its size.`:`Find η² in step 10 first.`,
+    isDone("eta")?`<table class="estable"><tr><td>Trivial</td><td>η² &lt; .01</td><td>Small</td><td>.01 – .09</td></tr><tr><td>Medium</td><td>.10 – .25</td><td>Large</td><td>η² &gt; .25</td></tr></table>`+choiceList("size",["Trivial","Small","Medium","Large"].map(s=>`<b>${s}</b>`),sz,"Not quite. Find where your η² falls in the table.","sizes"):"",
+    `An effect can be significant but small, especially with large samples, or large but not significant with small samples. That's why you report both.`,`Compare η² with the cutoffs in the table.`,"",{choice:true,noActions:!isDone("eta")});
+  const reject=C.F>fcVal;const wDone=isDone("dec");
+  h+=sumTable(`<tr class="b"><td class="src">Between</td>${cell("ssb",C.SSB)}${cell("dfc",C.dfB)}${cell("ms",C.MSB)}${cell("f",C.F)}</tr><tr class="w"><td class="src">Within</td>${cell("ssw",C.SSW)}${cell("dfc",C.dfW)}${cell("ms",C.MSW)}<td class="e"></td></tr><tr class="t"><td class="src">Total</td>${cell("sst",C.SST)}${cell("dfc",C.dfT)}<td class="e"></td><td class="e"></td></tr>`,
+    wDone?`<div class="writeup">F(${C.dfB}, ${C.dfW}) = ${fmt(C.F)}, p ${reject?"&lt;":"&gt;"} ${S.alpha===0.05?".05":".01"}${isDone("eta")?`, η² = ${fmt(C.eta)}`:""}</div>`:"",
+    `Between is spread caused by group differences; Within is ordinary person-to-person spread. The two numbers in brackets in the write-up are df between and df within.`);
+  return h;
+}
+function sstStep(n,C){const cA=`<span class="chip c1">`,cB=`<span class="chip c2">`,cC=`<span class="chip c3">`;
+  return stepCard(n,"sst","SS total",`Use the totals from the worksheet.`,`<div class="formula math">SS<sub>total</sub> = (ΣX<sup>2</sup><sub>total</sub>) − ${frac("(ΣX<sub>total</sub>)<sup>2</sup>","n<sub>total</sub>")}</div><div class="fields">${field("sst","sst",C.SST,"SS<sub>total</sub> =")}</div>`,
+    `How spread out all ${C.N} scores are around the overall average (${fmt(C.grand)}), ignoring condition.`,`Square ΣX total first, divide by n total, then subtract from ΣX² total.`,
+    wk("Plug in","",`SS<sub>total</sub> = ${cA}${fmt(C.SXX)}</span> − ${frac(`${cB}${fmt(C.SX)}</span><sup>2</sup>`,`${cC}${C.N}</span>`)}`)+conn+wk("Square","",`SS<sub>total</sub> = ${fmt(C.SXX)} − ${frac(fmt(C.SX*C.SX),C.N)}`)+conn+wk("Divide","",`SS<sub>total</sub> = ${fmt(C.SXX)} − ${fmt(C.CT)}`)+conn+wk("Subtract","",`SS<sub>total</sub> = ${fmt(C.SST)}`,true));}
+function ssbStep(n,C){
+  return stepCard(n,"ssb","SS between",`One fraction per group: that group's ΣX squared, divided by its n. Add them, then subtract the same piece you used in SS total.`,
+    `<div class="formula math">SS<sub>between</sub> = (Σ ${frac("(ΣX)<sup>2</sup>","n")}) − ${frac("(ΣX<sub>total</sub>)<sup>2</sup>","n<sub>total</sub>")}</div><div class="fields">${field("ssb","ssb",C.SSB,"SS<sub>between</sub> =")}</div>`,
+    `How far the condition averages sit from the overall average. If every average were the same, SS between would be 0.`,`${fmt(C.SX)}² ÷ ${C.N} = ${fmt(C.CT)} is the same number you subtracted in SS total.`,
+    wk("Plug in","One fraction per group",`SS<sub>between</sub> = (${C.G.map((g,i)=>frac(`${gm(i,fmt(g.sx))}<sup>2</sup>`,g.n)).join(" + ")}) − ${frac(`${fmt(C.SX)}<sup>2</sup>`,C.N)}`)+conn+
+    wk("Divide","Each fraction",`SS<sub>between</sub> = (${C.G.map(g=>fmt(g.sx*g.sx/g.n)).join(" + ")}) − ${fmt(C.CT)}`)+conn+wk("Add","",`SS<sub>between</sub> = ${fmt(C.sumGroup)} − ${fmt(C.CT)}`)+conn+wk("Subtract","",`SS<sub>between</sub> = ${fmt(C.SSB)}`,true));}
+function fStep(n,C,den,denName){
+  const Fr=r2(C.MSB)/r2(den);const note=fmt(Fr)!==fmt(C.F)?`<p class="small muted" style="text-align:center;max-width:560px">Using the rounded values gives ${fmt(Fr)}. That's only a rounding difference, and both answers are marked correct.</p>`:"";
+  return stepCard(n,"f","The F ratio",`Divide MS between by MS ${denName}.`,`<div class="formula math">F = ${frac("MS<sub>between</sub>",`MS<sub>${denName}</sub>`)}</div><div class="fields">${field("f","f",C.F,"F =")}</div>`,
+    `F is signal divided by noise. Near 1, the averages differ about as much as chance would produce. The bigger F gets, the less likely the difference is luck.`,`Keep extra decimals in your calculator and round only the final answer.`,
+    wk("Plug in","",`F = ${frac(`<span class="chip c3">${fmt(C.MSB)}</span>`,`<span class="chip ${denName==="error"?"c1":"c2"}">${fmt(den)}</span>`)}`)+conn+wk("Divide","",`F = ${fmt(C.F)}`,true)+note);}
+
+/* ---------- mode: within ---------- */
+function renderWS(p){
+  const C=computeWS(p);window.__C=C;const names=C.G.map(g=>esc(g.name));const k=C.k,n=C.n,N=C.N;let h="";
+  STEPS=[["hyp","Hypotheses"],["dfc","df and F critical"],["ws","Worksheet"],["sst","SS total"],["ssb","SS between"],["ssw","SS within"],["sss","SS subjects"],["sse","SS error"],["ms","Mean squares"],["f","F"],["dec","Decision"]];
+  h+=hypStep(1,C.G.map(g=>g.name),p.dv);
+  const row=tableRowFor(C.dfE);const fcVal=r2(fcrit(S.alpha,C.dfB,row));
+  h+=stepCard(2,"dfc","Degrees of freedom and F critical",`k = number of conditions (${k}), s = number of people (${n}), n<sub>total</sub> = number of scores (${N}). In a within-subjects ANOVA, use df between (column) and <b>df error</b> (row) to find F critical.`,
+    `<div class="formula math"><span class="ln">df<sub>between</sub> = k − 1 &nbsp;&nbsp; df<sub>within</sub> = n<sub>total</sub> − k</span><span class="ln">df<sub>subjects</sub> = s − 1 &nbsp;&nbsp; df<sub>error</sub> = (k − 1)(s − 1)</span><span class="ln">df<sub>total</sub> = n<sub>total</sub> − 1</span></div>
+     <div class="fields">${field("dfc","dfb",C.dfB,"df<sub>between</sub> =")}${field("dfc","dfw",C.dfW,"df<sub>within</sub> =")}${field("dfc","dfs",C.dfS,"df<sub>subjects</sub> =")}${field("dfc","dfe",C.dfE,"df<sub>error</sub> =")}${field("dfc","dft",C.dfT,"df<sub>total</sub> =")}</div>${alphaBtns()}
+     ${fTableHTML(C.dfB,C.dfE,isDone("dfc"),"error")}<div class="fields">${field("dfc","fc",fcVal,"F<sub>critical</sub> =")}</div>`,
+    `The denominator of F is MS error, so the table row is df error, not df within. Check: df subjects + df error = df within.`,
+    `${k} conditions, ${n} people, ${N} scores. df error = (${k} − 1)(${n} − 1).`,
+    wk("Between","k − 1",`df<sub>between</sub> = ${k} − 1 = ${C.dfB}`)+conn+wk("Within","n<sub>total</sub> − k",`df<sub>within</sub> = ${N} − ${k} = ${C.dfW}`)+conn+wk("Subjects","s − 1",`df<sub>subjects</sub> = ${n} − 1 = ${C.dfS}`)+conn+wk("Error","(k − 1)(s − 1)",`df<sub>error</sub> = ${C.dfB} × ${C.dfS} = ${C.dfE}`)+conn+wk("Total","n<sub>total</sub> − 1",`df<sub>total</sub> = ${N} − 1 = ${C.dfT}`)+conn+
+    wk("Look up",`Column ${C.dfB}, row ${isFinite(row)?row:"∞"}`,`F<sub>critical</sub>(${C.dfB}, ${C.dfE}) = ${fmt(fcVal)}`,true));
+  let t=`<div class="wsbox"><table class="ws"><thead><tr><th></th>${C.G.map((g,i)=>`<th colspan="2" class="gh ${ci(i)}">${names[i]}</th>`).join("")}<th colspan="2" class="sh">Person total</th></tr><tr><th></th>${C.G.map((g,i)=>`<th class="sub ${ci(i)}"><i>X</i></th><th class="sub ${ci(i)}"><i>X</i>²</th>`).join("")}<th class="ssub"><i>S</i></th><th class="ssub"><i>S</i>²</th></tr></thead><tbody>`;
+  for(let r=0;r<n;r++)t+=`<tr><th class="small muted" style="font-weight:400;text-align:left">P${r+1}</th>${C.G.map((g,i)=>`<td class="x">${fmt(g.x[r])}</td><td>${cellField("ws",`x2-${i}-${r}`,g.sq[r],`${names[i]} person ${r+1} squared`)}</td>`).join("")}<td>${cellField("ws",`s-${r}`,C.P[r],`Person ${r+1} total`)}</td><td>${cellField("ws",`s2-${r}`,C.P2[r],`Person ${r+1} total squared`)}</td></tr>`;
+  t+=`<tr><td colspan="${2*k+3}" style="height:8px"></td></tr><tr><th></th>${C.G.map(()=>`<td colspan="2"></td>`).join("")}<th class="tot">Total</th><th class="tot">ΣS²</th></tr>`;
+  [["ΣX","sx",C.SX],["ΣX²","sxx",C.SXX],["n","n",C.N]].forEach(([lab,key,tot],li)=>{t+=`<tr><th class="rl">${lab}</th>${C.G.map((g,i)=>`<td colspan="2" class="wide">${cellField("ws",`${key}-${i}`,g[key],`${lab} for ${names[i]}`)}</td>`).join("")}<td class="wide">${cellField("ws",`t${key}`,tot,`Total ${lab}`)}</td><td class="wide">${li===0?cellField("ws","ts2",C.SP2,"Sum of S squared"):""}</td></tr>`;});
+  t+=`</tbody></table></div>`;
+  h+=stepCard(3,"ws","Fill in the worksheet",`Square every score. Add each person's scores across the row to get their total (S), and square it (S²). Then fill in the column sums and totals. Here n<sub>total</sub> counts scores (${k} × ${n}), not people.`,t,
+    `S (a person's total) is the new ingredient for within-subjects designs. It's how the ANOVA measures how much people differ from each other overall.`,`S for person 1 = their ${k} scores added together. ΣS² = add up the S² column.`,
+    wk("People","",`<span style="font-size:15px;font-family:var(--f-mono)">S = ${C.P.join(", ")}<br>ΣS² = ${C.P2.join(" + ")} = <b>${fmt(C.SP2)}</b></span>`)+conn+wk("Totals","",`<span style="font-size:15px;font-family:var(--f-mono)">${C.G.map((g,i)=>`ΣX<sub>${i+1}</sub> = ${fmt(g.sx)}`).join(" · ")}<br>ΣX<sub>total</sub> = <b>${fmt(C.SX)}</b> · ΣX²<sub>total</sub> = <b>${fmt(C.SXX)}</b> · n<sub>total</sub> = <b>${C.N}</b></span>`,true));
+  h+=sstStep(4,C);h+=ssbStep(5,C);
+  h+=stepCard(6,"ssw","SS within",`Same as in a between-subjects ANOVA.`,`<div class="formula math">SS<sub>within</sub> = SS<sub>total</sub> − SS<sub>between</sub></div><div class="fields">${field("ssw","ssw",C.SSW,"SS<sub>within</sub> =")}</div>`,
+    `In a within-subjects design, this gets split into two parts in the next two steps.`,`SS total minus SS between.`,wk("Plug in","",`SS<sub>within</sub> = ${fmt(C.SST)} − ${fmt(C.SSB)}`)+conn+wk("Subtract","",`SS<sub>within</sub> = ${fmt(C.SSW)}`,true));
+  h+=stepCard(7,"sss","SS subjects",`One fraction per person: their total squared, divided by k. Because k is the same for everyone, you can add all the S² values first and divide once.`,
+    `<div class="formula math">SS<sub>subjects</sub> = (Σ ${frac("(ΣS)<sup>2</sup>","k")}) − ${frac("(ΣX<sub>total</sub>)<sup>2</sup>","n<sub>total</sub>")}</div><div class="fields">${field("sss","sss",C.SSS,"SS<sub>subjects</sub> =")}</div>`,
+    `How much people differ from each other overall. Some people just score higher in every condition. Repeated measures pulls this out of the noise.`,`ΣS² ÷ ${k}, then subtract ${fmt(C.CT)}.`,
+    wk("Plug in","",`SS<sub>subjects</sub> = ${frac(`<span class="chip c4">${fmt(C.SP2)}</span>`,k)} − ${fmt(C.CT)}`)+conn+wk("Divide","",`SS<sub>subjects</sub> = ${fmt(C.sumPerson)} − ${fmt(C.CT)}`)+conn+wk("Subtract","",`SS<sub>subjects</sub> = ${fmt(C.SSS)}`,true));
+  h+=stepCard(8,"sse","SS error",`Take the person-to-person differences out of SS within.`,`<div class="formula math">SS<sub>error</sub> = SS<sub>within</sub> − SS<sub>subjects</sub></div><div class="fields">${field("sse","sse",C.SSE,"SS<sub>error</sub> =")}</div>`,
+    `What's left is the noise the IV and people's general differences can't explain. This becomes the denominator of F.`,`SS within minus SS subjects.`,wk("Plug in","",`SS<sub>error</sub> = ${fmt(C.SSW)} − ${fmt(C.SSS)}`)+conn+wk("Subtract","",`SS<sub>error</sub> = ${fmt(C.SSE)}`,true));
+  h+=stepCard(9,"ms","Mean squares",`You only need two: MS between and MS error.`,`<div class="formula math"><span style="white-space:nowrap;display:inline-block">MS<sub>between</sub> = ${frac("SS<sub>between</sub>","df<sub>between</sub>")}</span><span class="sp"></span><span style="white-space:nowrap;display:inline-block">MS<sub>error</sub> = ${frac("SS<sub>error</sub>","df<sub>error</sub>")}</span></div><div class="fields">${field("ms","msb",C.MSB,"MS<sub>between</sub> =")}${field("ms","mse",C.MSE,"MS<sub>error</sub> =")}</div>`,
+    `MS between is the signal and MS error is the noise. You don't need MS within or MS subjects.`,`Keep two decimals.`,
+    wk("Between","SS ÷ df",`MS<sub>between</sub> = ${frac(fmt(C.SSB),C.dfB)} = ${fmt(C.MSB)}`)+conn+wk("Error","SS ÷ df",`MS<sub>error</sub> = ${frac(fmt(C.SSE),C.dfE)} = ${fmt(C.MSE)}`,true));
+  h+=fStep(10,C,C.MSE,"error");
+  h+=decisionStep(11,C,fcVal,isDone("f")&&isDone("dfc"));
+  const reject=C.F>fcVal;
+  h+=sumTable(`<tr class="b"><td class="src">Between</td>${cell("ssb",C.SSB)}${cell("dfc",C.dfB)}${cell("ms",C.MSB)}${cell("f",C.F)}</tr><tr class="w"><td class="src">Within</td>${cell("ssw",C.SSW)}${cell("dfc",C.dfW)}<td class="e"></td><td class="e"></td></tr><tr class="s"><td class="src">Subjects</td>${cell("sss",C.SSS)}${cell("dfc",C.dfS)}<td class="e"></td><td class="e"></td></tr><tr class="e"><td class="src">Error</td>${cell("sse",C.SSE)}${cell("dfc",C.dfE)}${cell("ms",C.MSE)}<td class="e"></td></tr><tr class="t"><td class="src">Total</td>${cell("sst",C.SST)}${cell("dfc",C.dfT)}<td class="e"></td><td class="e"></td></tr>`,
+    isDone("dec")?`<div class="writeup">F(${C.dfB}, ${C.dfE}) = ${fmt(C.F)}, p ${reject?"&lt;":"&gt;"} ${S.alpha===0.05?".05":".01"}</div>`:"",
+    `Within splits into Subjects + Error. F uses only MS between and MS error, so the second number in the brackets is df error.`);
+  return h;
+}
+
+/* ---------- mode: count ---------- */
+function renderCount(p){
+  STEPS=[["count","Count"],["name","Name the design"]];let h="";
+  h+=stepCard(1,"count","Count the IVs, groups and people",`Read the table${p.tables.length>1?"s":""} above.`,
+    `<div class="fields">${field("count","ivs",p.ans.ivs,"Number of IVs (factors) =")}${field("count","groups",p.ans.groups,"Number of groups (cells) =")}${field("count","N",p.ans.N,esc(p.Nlabel)+" =")}</div>`,
+    isDone("count")?`<b style="text-transform:none;letter-spacing:0;font-size:15px;color:var(--ink);display:inline">Why: </b>${esc(p.why)}`:`Each IV is one way the groups are split. Multiply the number of levels of each IV to get the number of groups.`,
+    p.variant==="owws"?`Are the rows different people in each column, or the same people every time?`:p.tables.length>1?`Each table is one level of a third IV.`:`Count the levels in the rows and the columns.`,"");
+  h+=stepCard(2,"name","Name the design",`Which name fits this design?`,choiceList("name",p.nameOpts.map(o=>`<b>${esc(o)}</b>`),p.nameOk,"Not quite. Name the design by the number of levels of each IV."),
+    `A one-way design has one IV. A factorial design is named by multiplying the levels of each IV: 2 × 3 means two IVs, one with 2 levels and one with 3.`,`How many IVs did you count? List the number of levels of each one.`,"",{choice:true});
+  return h;
+}
+/* ---------- mode: test ---------- */
+function renderTest(p){
+  STEPS=[["ivs","How many IVs?"],["people","Same or different people?"],["test","Which test?"]];let h="";
+  h+=stepCard(1,"ivs","How many IVs are there?",`Is anyone put into groups or conditions? If so, how many different things define those groups?`,
+    choiceList("ivs",["<b>None</b><br><span class='small muted'>Two things are just measured; nobody is put into groups</span>","<b>One IV</b>","<b>Two IVs</b>"],p.ivs,"Not quite. Count the different things that define the groups or conditions."),
+    `Each IV is a variable that defines groups or conditions. No groups at all usually means the question is about a relationship.`,`List the conditions. Do they come from one variable, or from crossing two?`,"",{choice:true});
+  h+=stepCard(2,"people","Same or different people?",`Who provides the scores in each condition?`,
+    choiceList("people",["<b>Different people in each group</b> (between-subjects)","<b>The same people in every condition</b> (within-subjects)","<b>Different people for one IV, the same people for the other</b> (mixed)","<b>No groups to compare</b>"],p.people,"Not quite. Is each person measured once, or in several conditions?"),
+    `Between-subjects: each person is in one group. Within-subjects: each person does every condition. Mixed: one of each.`,`Look for words like "randomly assigned to one…" versus "each person completes all…".`,"",{choice:true});
+  h+=stepCard(3,"test","Which test should the researcher run?",``,choiceList("test",TESTS.map(t=>`<b>${t}</b>`),p.ans,"Not quite. Use your answers to steps 1 and 2."),
+    isDone("test")?`<b style="text-transform:none;letter-spacing:0;font-size:15px;color:var(--ink);display:inline">Why: </b>${["One IV, and different people in each group.","One IV, and the same people measured in every condition.","Two IVs, and different people in every group.","Two IVs, and the same people in every combination.","Two IVs: one splits people into different groups, and everyone is measured at every level of the other.","No groups: two measured variables, and the question is whether they go together."][p.ans]}`:`Steps 1 and 2 together point to the test.`,
+    `Number of IVs (one-way or two-way) + who is in each condition (between, within or mixed). No groups means a correlation.`,"",{choice:true});
+  return h;
+}
+
+/* ================= panels ================= */
+function renderTabs(){document.getElementById("tabs").innerHTML=MODES.map(([k,t,s])=>`<button class="tab ${S.mode===k?"on":""}" data-mode="${k}" aria-pressed="${S.mode===k}"><b>${t}</b><span>${s}</span></button>`).join("");}
+function renderProbBar(){const m=M();
+  document.getElementById("probrow").innerHTML=`<span class="lbl">Practice set:</span>`+PRESETS[S.mode].map((_,i)=>`<button class="btn ${m.pi===i?"on":""}" data-pi="${i}">Problem ${i+1}</button>`).join("")+`<button class="btn primary" data-pi="new">${m.pi==="new"?"Another new problem":"New problem"}</button>`+(m.pi==="new"?`<span class="seen">New problem · never shown before in this browser</span>`:"");}
+function renderProblem(){const p=M().prob;const st=document.getElementById("story"),dt=document.getElementById("datatbl");
+  if(p.kind==="bs"||p.kind==="ws"){st.innerHTML=`<b>The study.</b> ${esc(p.story)} <span class="muted">We measured ${esc(p.dv)}.</span>`;
+    const cols=p.kind==="bs"?p.groups:p.cols;const n=Math.max(...cols.map(c=>c.length));
+    dt.innerHTML=`<div class="dwrap"><table class="dt"><tr>${p.kind==="ws"?'<th class="corner"></th>':""}${p.names.map((nm,i)=>`<th class="gh ${ci(i)}">${esc(nm)}</th>`).join("")}</tr>${Array.from({length:n},(_,r)=>`<tr>${p.kind==="ws"?`<th class="rh c4">Person ${r+1}</th>`:""}${cols.map(c=>`<td>${r<c.length?c[r]:""}</td>`).join("")}</tr>`).join("")}</table></div>`;}
+  else if(p.kind==="count"){st.innerHTML=`<b>The design.</b> ${esc(p.text)}`;
+    dt.innerHTML=`<div class="dtables">${p.tables.map(t=>`<div class="dwrap"><table class="dt"><caption>${esc(t.caption)}</caption><tr>${t.rowHead?'<th class="corner"></th>':""}${t.colHead.map((c,i)=>`<th class="gh ${ci(i)}">${esc(c)}</th>`).join("")}</tr>${t.cells.map((r,ri)=>`<tr>${t.rowHead?`<th class="rh c4">${esc(t.rowHead[ri])}</th>`:""}${r.map(v=>`<td>${v}</td>`).join("")}</tr>`).join("")}</table></div>`).join("")}</div>`;}
+  else{st.innerHTML=`<b>The study.</b> ${esc(p.text)}`;dt.innerHTML="";}
+  document.getElementById("plotpanel").hidden=!(p.kind==="bs"||p.kind==="ws");}
+function niceStep(r){const p=Math.pow(10,Math.floor(Math.log10(r)));const m=r/p;return (m<=1?1:m<=2?2:m<=5?5:10)*p;}
+function renderPlot(){const p=M().prob,el=document.getElementById("plot"),lg=document.getElementById("legend");if(!(p.kind==="bs"||p.kind==="ws")){el.innerHTML="";return;}
+  const C=window.__C;const W=680,H=300,L=46,R=16,T=18,B=46;const all=C.G.flatMap(g=>g.x);
+  let lo=0,hi=Math.max(...all);const st=niceStep(hi/5);hi=Math.ceil(hi/st)*st;const y=v=>T+(hi-v)/(hi-lo)*(H-T-B);const cw=(W-L-R)/C.k;let s="";
+  for(let v=lo;v<=hi+1e-9;v+=st)s+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--line);stroke-width:1"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end" style="fill:var(--muted);font:12px var(--f-mono)">${fmt(v)}</text>`;
+  const cx=i=>L+cw*(i+.5);
+  if(p.kind==="ws"){for(let r=0;r<C.n;r++){const off=(r-(C.n-1)/2)*4;s+=`<polyline points="${C.G.map((g,i)=>`${cx(i)+off},${y(g.x[r])}`).join(" ")}" style="fill:none;stroke:var(--muted);stroke-width:1.2;opacity:.45"/>`;}}
+  C.G.forEach((g,i)=>{const col=`var(--g${i%5+1})`;const counts={},seen={};g.x.forEach(v=>counts[v]=(counts[v]||0)+1);
+    g.x.forEach((v,r)=>{let off;if(p.kind==="ws")off=(r-(C.n-1)/2)*4;else{seen[v]=(seen[v]||0)+1;off=(seen[v]-1-(counts[v]-1)/2)*12;}s+=`<circle cx="${cx(i)+off}" cy="${y(v)}" r="5" style="fill:${col};opacity:.6"/>`;});
+    s+=`<line x1="${cx(i)-cw*.32}" x2="${cx(i)+cw*.32}" y1="${y(g.mean)}" y2="${y(g.mean)}" style="stroke:${col};stroke-width:3.5;stroke-linecap:round"/>`;
+    const nm=g.name.length>18?g.name.slice(0,17)+"…":g.name;s+=`<text x="${cx(i)}" y="${H-B+20}" text-anchor="middle" style="fill:${col};font:700 13px var(--f-body)">${esc(nm)}</text><text x="${cx(i)}" y="${H-B+36}" text-anchor="middle" style="fill:var(--muted);font:12px var(--f-body)">avg ${fmt(g.mean)}</text>`;});
+  s+=`<line x1="${L}" x2="${W-R}" y1="${y(C.grand)}" y2="${y(C.grand)}" style="stroke:var(--muted);stroke-width:1.5;stroke-dasharray:6 5"/>`;
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Scores by condition with each condition's average and the overall average of ${fmt(C.grand)}"><title>Scores by condition</title>${s}</svg>`;
+  lg.innerHTML=`<span><i style="width:10px;height:10px;border-radius:50%;background:var(--muted)"></i>One score</span>${p.kind==="ws"?`<span><i style="width:22px;height:2px;background:var(--muted);opacity:.6"></i>Same person across conditions</span>`:""}<span><i style="width:22px;height:3px;background:var(--g1);border-radius:2px"></i>Condition average</span><span><i style="width:22px;border-top:2px dashed var(--muted)"></i>Overall average</span>`;}
+function renderSteps(){FIELDS={};CHOICES={};const p=M().prob;
+  const h=p.kind==="bs"?renderBS(p):p.kind==="ws"?renderWS(p):p.kind==="count"?renderCount(p):renderTest(p);
+  document.getElementById("steps").innerHTML=h;renderPlot();updateProgress();
+  if(isDone("dfc")){const w=document.getElementById("ftwrap"),r=document.getElementById("ft-hit");if(w&&r)w.scrollTop=Math.max(0,r.offsetTop-90);}}
+function renderAll(){renderTabs();renderProbBar();if(M().prob.kind==="bs")window.__C=computeBS(M().prob);if(M().prob.kind==="ws")window.__C=computeWS(M().prob);renderProblem();renderSteps();
+  document.getElementById("eyebrow").textContent=MODES.find(m=>m[0]===S.mode)[1]+" practice";}
+
+/* ================= checking ================= */
+function judge(input,exact){if(input===undefined||String(input).trim()==="")return "empty";const v=num(input);if(isNaN(v))return "bad";
+  const d=Math.abs(v-exact);if(d<=0.0051+1e-9)return "ok";if(d<=Math.max(0.06,Math.abs(exact)*0.004))return "close";return "bad";}
+function checkStep(id){const m=M();const fs=FIELDS[id]||[];let ok=0,close=0,empty=0;
+  fs.forEach(f=>{const r=judge(m.ans[f.fid],f.val);m.res[f.fid]=r;if(r==="ok")ok++;else if(r==="close"){ok++;close++;}else if(r==="empty")empty++;});
+  if(empty){m.fb[id]={k:"bad",t:`Fill in every box before checking. ${empty} ${empty===1?"box is":"boxes are"} still empty.`};m.status[id]=m.status[id]==="done"?"done":"try";}
+  else if(ok===fs.length){m.status[id]=m.status[id]==="shown"?"shown":"done";m.fb[id]=close?{k:"warn",t:"Correct, apart from a small rounding difference."}:{k:"ok",t:fs.length>1?"All correct.":"Correct."};}
+  else{m.status[id]="try";m.fb[id]={k:"bad",t:fs.length===1?"Not quite. Check your working, or open the hint.":`${ok} of ${fs.length} correct. Look again at the red ${fs.length-ok===1?"box":"boxes"}, or open the hint.`};}
+  renderSteps();focusStep(id);}
+function showAnswer(id){const m=M();if(CHOICES[id]){m.status[id]="shown";m.fb[id]={k:"warn",t:"The correct answer is highlighted in green."};renderSteps();focusStep(id);return;}
+  (FIELDS[id]||[]).forEach(f=>{m.ans[f.fid]=fmtIn(f.val);m.res[f.fid]="shown";});m.status[id]="shown";m.fb[id]={k:"warn",t:"Answer filled in. Read the worked solution, then try the next step yourself."};renderSteps();focusStep(id);}
+function choose(id,j){const m=M();const c=CHOICES[id];if(!c)return;m.choice[id]=j;
+  if(j===c.ok){m.status[id]=m.status[id]==="shown"?"shown":"done";m.fb[id]={k:"ok",t:"Correct."};}else{m.status[id]="try";m.fb[id]={k:"bad",t:c.bad};}
+  renderSteps();focusStep(id);}
+function focusStep(id){const el=document.getElementById("step-"+id);if(el){const b=el.querySelector("[data-check],[data-choice]");if(b)b.focus({preventScroll:true});}}
+function updateProgress(){const done=STEPS.filter(([id])=>isDone(id)).length;document.getElementById("pbar").style.width=(done/STEPS.length*100)+"%";
+  document.getElementById("ptext").textContent=`${done} of ${STEPS.length} steps`;
+  document.getElementById("nav").innerHTML=STEPS.map(([id,l],i)=>`<a href="#step-${id}" class="${M().status[id]||""}"><span class="d"></span>${i+1}. ${l}</a>`).join("")+(document.getElementById("step-sum")?`<a href="#step-sum"><span class="d"></span>Summary</a>`:"");}
+
+/* ================= events ================= */
+document.getElementById("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-mode]");if(!b)return;S.mode=b.dataset.mode;try{localStorage.setItem("ex3Mode",S.mode);}catch(err){}renderAll();});
+document.getElementById("probrow").addEventListener("click",e=>{const b=e.target.closest("[data-pi]");if(!b)return;const m=M();
+  if(b.dataset.pi==="new"){const p=fresh(GEN[S.mode]);if(!p){alert("Couldn't make a new problem. Try again.");return;}m.prob=p;m.pi="new";}
+  else{m.pi=+b.dataset.pi;m.prob=PRESETS[S.mode][m.pi];}
+  clearAnswers();renderAll();});
+const stepsEl=document.getElementById("steps");
+stepsEl.addEventListener("input",e=>{const f=e.target.dataset.fid;if(!f)return;const m=M();m.ans[f]=e.target.value;if(m.res[f]){delete m.res[f];e.target.className="";const p=e.target.closest(".fld");if(p)p.className="fld";}});
+stepsEl.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.dataset.step){e.preventDefault();checkStep(e.target.dataset.step);}});
+stepsEl.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)return;const m=M();
+  if(t.dataset.check)checkStep(t.dataset.check);
+  else if(t.dataset.show)showAnswer(t.dataset.show);
+  else if(t.dataset.hint){m.hint[t.dataset.hint]=!m.hint[t.dataset.hint];renderSteps();focusStep(t.dataset.hint);}
+  else if(t.dataset.choice)choose(t.dataset.choice,+t.dataset.j);
+  else if(t.dataset.alpha){S.alpha=+t.dataset.alpha;["dfc","dec"].forEach(id=>{if(m.status[id])m.status[id]="try";delete m.fb[id];delete m.choice[id];});delete m.ans.fc;delete m.res.fc;renderSteps();}});
+renderAll();
+
+</script>
+</body>
+</html>
